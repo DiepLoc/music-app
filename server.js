@@ -5,6 +5,7 @@ const fileUpload = require("express-fileupload");
 const audioUpload = require("./app/middlewares/audioUpload");
 const mongoConnection = require("./app/middlewares/mongoConnection");
 const musicRoutes = require("./app/routes/music.routes");
+const sse = require("./app/middlewares/mySse");
 
 require("dotenv").config();
 const app = express();
@@ -28,8 +29,11 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
 });
 
+// listen for sync with sse
+app.get('/sync', sse.init);
+
 // main routes
-app.use("/music", musicRoutes);
+app.use("/musics", musicRoutes);
 
 // add my audioupload middleware
 app.post("/audio-upload", audioUpload);

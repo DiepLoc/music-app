@@ -7,9 +7,9 @@ const audioUpload = (req, res, next) => {
 
   const strTime = new Date().toLocaleString().replace(/\/| |,|:/gi, "-");
 
-  const uploadPath = `audios/${strTime}-${file.name}`;
+  const uploadPath = `audio/${strTime}-${file.name}`;
 
-  file.mv(`${__dirname}/public/${uploadPath}`, (err) => {
+  file.mv(`public/${uploadPath}`, (err) => {
     if (err) {
       console.log(err);
       return res.status(500).json({err});
