@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     maxWidth: 600,
     backgroundColor: theme.palette.background.paper,
+    marginBottom: theme.spacing(7)
   },
   inline: {
     display: "inline",
@@ -35,6 +36,7 @@ const Musics = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [playingMusic, setPlayingMusic] = useState(null);
+  const [currentStyle, setCurrentStyle] = useState(1);
   const [isShowFavorite, setIsShowFavorite] = useState(false);
 
   const [editingMusicId, setEditingMusicId] = useState(null);
@@ -130,7 +132,7 @@ const Musics = () => {
     try {
       setLoading(true);
       const { data } = await musicAPI.createMusic(newMusic);
-      console.log("create", data)
+      console.log("create", data);
       setMusics((old) => [...old, data]);
       setLoading(false);
       handleCloseModal();
@@ -240,8 +242,11 @@ const Musics = () => {
           relativeUrl={playingMusic.url}
           musicName={playingMusic.name}
           singer={playingMusic.singer}
+          currentStyle={currentStyle}
+          setCurrentStyle={setCurrentStyle}
           goNext={goNextMusic}
           goPrevious={goPreviousMusic}
+          goRandom={goRandomMusic}
         />
       )}
       <MusicModal

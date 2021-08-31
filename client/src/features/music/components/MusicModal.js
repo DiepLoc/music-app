@@ -47,8 +47,6 @@ const MusicModal = ({ music, open, handleClose, handleSave }) => {
   const onSave = () => {
     if (!buffer.name) return setError(Localization.validation.nameRequired);
     if (!buffer.url) return setError(Localization.validation.urlRequired);
-
-    console.log("pre save", buffer);
     handleSave(buffer);
   };
 
@@ -58,8 +56,8 @@ const MusicModal = ({ music, open, handleClose, handleSave }) => {
     formData.append("file", file);
     try {
       const { data } = await musicAPI.uploadAudioFile(formData);
+
       setShowDropsoze(false);
-      console.log(data.filePath);
       setBuffer((old) => {
         if (!old.name) return { ...old, name: file.name, url: data.filePath };
         return { ...old, url: data.filePath };

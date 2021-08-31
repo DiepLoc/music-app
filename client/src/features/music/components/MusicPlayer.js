@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(1),
     fontStyle: "italic",
     width: 200,
-    textAlign: 'right'
+    textAlign: "right",
   },
   audio: {
     width: "100%",
@@ -36,16 +36,59 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const MusicPlayer = ({ relativeUrl, musicName, singer, goNext, goPrevious }) => {
+const MusicPlayer = ({
+  relativeUrl,
+  musicName,
+  singer,
+  goNext,
+  goPrevious,
+  goRandom,
+  currentStyle,
+  setCurrentStyle,
+}) => {
   const classes = useStyles();
-  const lang = useSelector(state => state.music.lang);
-  const [loop, setLoop] = useState(true);
+  const lang = useSelector((state) => state.music.lang);
   const audioRef = useRef(null);
+
+  const onNext = () => {
+    switch (currentStyle) {
+      case 0:
+        break;
+      case 1:
+        goNext();
+        break;
+      case 2:
+        goRandom();
+        break;
+    }
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = 0;
+    audioRef.current.play();
+  };
+
+  const onPrevious = () => {
+    switch (currentStyle) {
+      case 0:
+        break;
+      case 1:
+        goPrevious();
+        break;
+      case 2:
+        goRandom();
+        break;
+    }
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = 0;
+    audioRef.current.play();
+  };
 
   useEffect(() => {
     if (!audioRef.current) return;
-    audioRef.current.addEventListener('ended', () => console.log(244241))
-  }, [audioRef])
+
+    const endedEvt = () => void onNext();
+    audioRef.current.addEventListener("ended", endedEvt);
+    return () => void audioRef.current?.removeEventListener("ended", endedEvt);
+  }, [audioRef, onNext]);
 
   return (
     <AppBar className={classes.root}>
@@ -57,18 +100,26 @@ const MusicPlayer = ({ relativeUrl, musicName, singer, goNext, goPrevious }) => 
           {Localization.field.singer}: {singer || "unknown"}
         </Typography>
       </div>
-      <audio controls className={classes.audio} autoPlay loop={loop} ref={r => audioRef.current = r}>
+      <audio
+        controls
+        className={classes.audio}
+        autoPlay
+        ref={(r) => (audioRef.current = r)}
+      >
         <source src={getStaticUrl(relativeUrl)} type="audio/mpeg" />
       </audio>
       <Paper className={classes.naviContainer}>
-        <IconButton aria-label="previous" onClick={goPrevious}>
+        <IconButton aria-label="previous" onClick={onPrevious}>
           <SkipPreviousIcon />
         </IconButton>
-        <IconButton aria-label="next" onClick={goNext}>
+        <IconButton aria-label="next" onClick={onNext}>
           <SkipNextIcon />
         </IconButton>
       </Paper>
-      <PlayingStyle />
+      <PlayingStyle
+        currentStyle={currentStyle}
+        setCurrentStyle={setCurrentStyle}
+      />
     </AppBar>
   );
 };

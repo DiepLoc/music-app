@@ -4,6 +4,8 @@ const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const audioUpload = require("./app/middlewares/audioUpload");
 const mongoConnection = require("./app/middlewares/mongoConnection");
+const swaggerJsDoc = require("swagger-jsdoc");
+const swaggerUI = require("swagger-ui-express");
 const musicRoutes = require("./app/routes/music.routes");
 const http = require("http");
 const SocketIO = require("./app/modules/SocketIO");
@@ -14,6 +16,28 @@ require("dotenv").config();
 const app = express();
 const server = http.createServer(app);
 
+// set up swagger
+const options = {
+	definition: {
+		openapi: "3.0.0",
+		info: {
+			title: "Library API",
+			version: "1.0.0",
+			description: "A simple Express Library API for Music application",
+		},
+		servers: [
+			{
+				url: "http://localhost:5000",
+			},
+		],
+	},
+	apis: ["./app/routes/*.js"],
+};
+
+const specs = swaggerJsDoc(options);
+
+// swagger
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 // upload
 app.use(fileUpload({ limits: { fileSize: 50 * 1024 * 1024 } }));
 // turn on CORS

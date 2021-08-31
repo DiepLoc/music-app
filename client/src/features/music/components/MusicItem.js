@@ -15,7 +15,7 @@ import {
 import PlayArrowRoundedIcon from "@material-ui/icons/PlayArrowRounded";
 import FavoriteBorderOutlinedIcon from "@material-ui/icons/FavoriteBorderOutlined";
 import FavoriteOutlinedIcon from "@material-ui/icons/FavoriteOutlined";
-import MenuOutlinedIcon from "@material-ui/icons/MenuOutlined";
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import { makeStyles } from "@material-ui/core/styles";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
@@ -144,7 +144,7 @@ const MusicItem = ({
             <PlayArrowRoundedIcon />
           </IconButton>
           <IconButton edge="end" aria-label="play music" onClick={handleSetEl}>
-            <MenuOutlinedIcon />
+            <MoreHorizIcon />
           </IconButton>
         </ListItemSecondaryAction>
       </ListItem>

@@ -40,6 +40,10 @@ class MusicPlayStyles {
   static getPreviousMusic(musics, music, checkFavorite) {
     return this.getNextOrPreviousMusic(musics, music, checkFavorite, false);
   }
+
+  static getReplayedCurrentMusic(music) {
+    return {...music};
+  }
 };
 
 export default MusicPlayStyles;

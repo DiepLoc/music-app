@@ -6,8 +6,7 @@ import { Fab, Tooltip, Typography } from "@material-ui/core";
 import Localization from "../../../common/modules/Localization";
 import { useSelector } from "react-redux";
 
-const PlayingStyle = () => {
-  const [currentStyle, setCurrentStyle] = useState(0);
+const PlayingStyle = ({currentStyle, setCurrentStyle}) => {
   const lang = useSelector(state => state.music.lang);
 
   const playingStyles = useMemo(() => [
