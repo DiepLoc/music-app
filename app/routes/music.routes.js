@@ -3,7 +3,7 @@ const Music = require("../models/Music");
 const router = express.Router();
 const catchAsync = require("../libs/catchAsync");
 const unlinkFile = require("../libs/unlinkFile");
-const sse = require("../middlewares/mySse");
+const MusicSyncer = require("../modules/MusicSyncer");
 
 router.get(
   "/",
@@ -16,7 +16,7 @@ router.get(
   "/:id",
   catchAsync(async (req, res, next) => {
     const music = await Music.findById(req.params.id);
-    if (!music) return res.status(404).json({ err: "Music not found" });
+    if (!music) return res.status(404).json({ err: "Music not found." });
     res.json(music);
   })
 );
@@ -30,10 +30,9 @@ router.post(
     const { name, creator, singer, url, favorite } = req.body;
     const music = new Music({ name, creator, singer, url, favorite });
     const savedMusic = await music.save();
-    try {
-      sse.addSomething({data: savedMusic._id});
-    }catch (err) {console.log(err)}
-    res.json(savedMusic);
+
+    MusicSyncer.sendAddedEvent(savedMusic);
+    res.status(201).json(savedMusic);
   })
 );
 
@@ -42,16 +41,23 @@ router.put(
   catchAsync(async (req, res, next) => {
     const { name, creator, singer, url, favorite } = req.body;
 
-    const oldMusic = await Music.findByIdAndUpdate(req.params.id, {
-      $set: { name, creator, singer, url, favorite },
-    });
+    const oldMusic = await Music.findById(req.params.id);
+    if (!oldMusic) return res.status(404).json({ err: "Music not found." });
 
-    if (typeof url === 'string' && oldMusic.url !== url) {
+    await Music.updateOne(
+      { _id: req.params.id },
+      {
+        $set: { name, creator, singer, url, favorite },
+      }
+    );
+
+    if (typeof url === "string" && oldMusic.url !== url) {
       unlinkFile(oldMusic.url);
     }
-    
-    sse.updateSomething({data: req.params.id})
-    res.json(oldMusic);
+
+    const newMusic = await Music.findById(req.params.id);
+    MusicSyncer.sendEditedEvent(newMusic);
+    res.json(newMusic);
   })
 );
 
@@ -59,12 +65,12 @@ router.delete(
   "/:id",
   catchAsync(async (req, res, next) => {
     const targetMusic = await Music.findById(req.params.id);
-    if (!targetMusic) return res.status(404).json({ err: "Music not found" });
+    if (!targetMusic) return res.status(404).json({ err: "Music not found." });
 
     const result = await Music.findByIdAndDelete(req.params.id);
     unlinkFile(result.url);
 
-    sse.deleteSomething({data: req.params.id})
+    MusicSyncer.sendDeletedEvent(req.params.id);
     res.json(result);
   })
 );

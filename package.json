@@ -2,11 +2,11 @@
   "name": "locdiep_music_project",
   "version": "1.0.0",
   "description": "a music project",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "server": "nodemon server.js",
+    "test": "mocha",
+    "start": "node index.js",
+    "server": "nodemon index.js",
     "client": "yarn --cwd ./client/ start",
     "dev": "concurrently \"yarn server\" \"yarn client\""
   },
@@ -19,6 +19,9 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.2.1",
     "express-sse": "^0.5.3",
-    "mongoose": "^6.0.1"
+    "mocha": "^9.1.1",
+    "mongoose": "^6.0.1",
+    "socket.io": "^4.2.0",
+    "supertest": "^6.1.6"
   }
 }

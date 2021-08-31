@@ -1,13 +1,10 @@
-import {
-  Button,
-  Drawer,
-  TextField,
-  Typography,
-} from "@material-ui/core";
+import { Button, Drawer, TextField, Typography } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { DropzoneDialog } from "material-ui-dropzone";
 import musicAPI from "../musicAPI";
+import { useSelector } from "react-redux";
+import Localization from "../../../common/modules/Localization";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,28 +22,31 @@ const useStyles = makeStyles((theme) => ({
 
 const MusicModal = ({ music, open, handleClose, handleSave }) => {
   const classes = useStyles();
+  const lang = useSelector((state) => state.music.lang);
   const [buffer, setBuffer] = useState({});
   const [error, setError] = useState(null);
   const [showDropzone, setShowDropsoze] = useState(false);
 
   useEffect(() => {
-    if (!music || !Object.keys(music).length === 0) {
+    if (!music || Object.keys(music).length === 0) {
       setBuffer({});
     } else {
       setBuffer({ ...music });
     }
+    setError(null);
   }, [music]);
 
   const handleChangeDataField = (field, value) => {
     const trimedValue = value.trimStart();
+    setError(null);
     setBuffer((old) => {
       return { ...old, [field]: trimedValue };
     });
   };
 
   const onSave = () => {
-    if (!buffer.name) return setError(`Name is required`);
-    if (!buffer.url) return setError(`Please upload a audio file`);
+    if (!buffer.name) return setError(Localization.validation.nameRequired);
+    if (!buffer.url) return setError(Localization.validation.urlRequired);
 
     console.log("pre save", buffer);
     handleSave(buffer);
@@ -59,9 +59,10 @@ const MusicModal = ({ music, open, handleClose, handleSave }) => {
     try {
       const { data } = await musicAPI.uploadAudioFile(formData);
       setShowDropsoze(false);
+      console.log(data.filePath);
       setBuffer((old) => {
         if (!old.name) return { ...old, name: file.name, url: data.filePath };
-        return { ...old, url: data.filePath }
+        return { ...old, url: data.filePath };
       });
     } catch (err) {
       console.log(err.response);
@@ -76,8 +77,8 @@ const MusicModal = ({ music, open, handleClose, handleSave }) => {
           return (
             <TextField
               key={field}
-              label={field.firstCharToUppercase()}
-              value={buffer[field]}
+              label={Localization.field[field]?.firstCharToUppercase()}
+              value={buffer[field] || ""}
               onChange={(e) => handleChangeDataField(field, e.target.value)}
               variant="outlined"
             />
@@ -89,7 +90,7 @@ const MusicModal = ({ music, open, handleClose, handleSave }) => {
             color="secondary"
             onClick={() => setShowDropsoze(true)}
           >
-            Upload Audio
+            {Localization.menu.uploadAudio}
           </Button>
         )}
         <DropzoneDialog
@@ -108,7 +109,7 @@ const MusicModal = ({ music, open, handleClose, handleSave }) => {
         </Typography>
       )}
       <Button variant="contained" color="primary" onClick={onSave}>
-        Save
+        {Localization.menu.save}
       </Button>
     </Drawer>
   );

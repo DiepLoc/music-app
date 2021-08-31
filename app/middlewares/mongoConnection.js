@@ -1,11 +1,14 @@
 const mongooes = require("mongoose");
 
 const mongoConnection = () => {
+  let mongoConnectUrl = process.env.DEV_MONGO_CONNECTION_URL;
+  if (process.env.NODE_ENV === 'test') mongoConnectUrl = process.env.TEST_MONGO_CONNECTION_URL;
+
   mongooes.connect(
-    process.env.MONGO_CONNECTION_URL,
+    mongoConnectUrl,
     { useNewUrlParser: true },
     () => {
-      console.log("connected to DB!")
+      console.log("\t\t\tconnected to DB!")
     }
   );
 }

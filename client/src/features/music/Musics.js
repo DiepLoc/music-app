@@ -8,7 +8,8 @@ import MusicItem from "./components/MusicItem";
 import MusicModal from "./components/MusicModal";
 import AddIcon from "@material-ui/icons/Add";
 import MusicPlayStyleHandler from "./MusicPlayStyleHandler";
-import MusicSse from "./components/MusicSse";
+import MusicSyncer from "./components/MusicSyncer";
+import AppLocalization from "./components/AppLocalization";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -58,7 +59,7 @@ const Musics = () => {
     setPlayingMusic(music);
   };
 
-  const handleSomthingWrong = (err) => {
+  const handleSomethingWrong = (err) => {
     setLoading(false);
     console.log(err.response?.data);
   };
@@ -66,16 +67,16 @@ const Musics = () => {
   const handleChangeFavoriteToMusic = async (id, newFavorite) => {
     try {
       setLoading(true);
-      await musicAPI.setFavoriteToMusic(id, newFavorite);
+      const { data } = await musicAPI.setFavoriteToMusic(id, newFavorite);
       const cloneMusics = [...musics];
       const changedMusic = cloneMusics.find((m) => m._id === id);
       if (changedMusic) {
-        changedMusic.favorite = newFavorite;
+        changedMusic.favorite = data.favorite;
         setMusics(cloneMusics);
       }
       setLoading(false);
     } catch (err) {
-      handleSomthingWrong(err);
+      handleSomethingWrong(err);
     }
   };
 
@@ -87,7 +88,7 @@ const Musics = () => {
       setMusics(newMusics);
       setLoading(false);
     } catch (err) {
-      handleSomthingWrong(err);
+      handleSomethingWrong(err);
     }
   };
 
@@ -114,15 +115,14 @@ const Musics = () => {
   const handleEditMusic = async (newData) => {
     try {
       setLoading(true);
-      await musicAPI.editMusic(newData);
-      const targetMusic = musics.find((m) => m._id === newData._id);
+      const { data } = await musicAPI.editMusic(newData);
+      const newMusics = [...musics].filter((m) => m._id !== data._id);
+      newMusics.push(data);
+      setMusics(newMusics);
       setLoading(false);
-      if (!targetMusic) return;
-      Object.keys(newData).forEach((key) => (targetMusic[key] = newData[key]));
-      setMusics([...musics]);
       handleCloseModal();
     } catch (err) {
-      handleSomthingWrong(err);
+      handleSomethingWrong(err);
     }
   };
 
@@ -130,11 +130,12 @@ const Musics = () => {
     try {
       setLoading(true);
       const { data } = await musicAPI.createMusic(newMusic);
+      console.log("create", data)
       setMusics((old) => [...old, data]);
       setLoading(false);
       handleCloseModal();
     } catch (err) {
-      handleSomthingWrong(err);
+      handleSomethingWrong(err);
     }
   };
 
@@ -160,33 +161,33 @@ const Musics = () => {
     );
   };
 
-  const syncUpdate = async (id) => {
+  const syncEdit = async (newMusic) => {
     try {
-      const { data } = await musicAPI.getMusic(id);
+      const { data } = await musicAPI.getMusic(newMusic._id);
       const updatedMusic = musics.find((m) => m._id === data._id);
       Object.keys(data).forEach((key) => (updatedMusic[key] = data[key]));
-      setMusics([...musics])
+      setMusics([...musics]);
     } catch (err) {
-      handleSomthingWrong(err);
+      handleSomethingWrong(err);
     }
   };
-  const syncAdd = async (id) => {
+  const syncAdd = async (newMusic) => {
     try {
-      const { data } = await musicAPI.getMusic(id);
-      const checkMusic = musics.find((m) => m._id === data._id);
-      if (checkMusic) return;
-      setMusics([...musics, checkMusic])
+      const { data } = await musicAPI.getMusic(newMusic._id);
+      const isExisted = musics.find((m) => m._id === data._id);
+      if (isExisted) return;
+      setMusics([...musics, data]);
     } catch (err) {
-      handleSomthingWrong(err);
+      handleSomethingWrong(err);
     }
   };
   const syncDelete = async (id) => {
     try {
-      const checkMusic = musics.find((m) => m._id === id);
-      if (!checkMusic) return;
-      setMusics(old => old.filter(m => m._id !== id))
+      const isExisted = musics.find((m) => m._id === id);
+      if (!isExisted) return;
+      setMusics((old) => old.filter((m) => m._id !== id));
     } catch (err) {
-      handleSomthingWrong(err);
+      handleSomethingWrong(err);
     }
   };
 
@@ -204,6 +205,7 @@ const Musics = () => {
           handlePlayNewAudio={handlePlayNewAudio}
           loading={loading}
           onEditMusic={onEditMusic}
+          highlight={music._id === playingMusic?._id}
         />
       );
     });
@@ -221,10 +223,13 @@ const Musics = () => {
         onClose={() => setError(null)}
         message={typeof error === "string" ? error : "Faild."}
       />
+
       <MusicCatalogs setShowFavorite={setIsShowFavorite} />
-      <IconButton aria-label="delete" onClick={onCreateMusic}>
+
+      <IconButton aria-label="add new music" onClick={onCreateMusic}>
         <AddIcon />
       </IconButton>
+
       {renderedMusics.length > 0 && (
         <List className={classes.musics}>{renderedMusics}</List>
       )}
@@ -234,7 +239,7 @@ const Musics = () => {
           key={playingMusic._id}
           relativeUrl={playingMusic.url}
           musicName={playingMusic.name}
-          singer={playingMusic.singder}
+          singer={playingMusic.singer}
           goNext={goNextMusic}
           goPrevious={goPreviousMusic}
         />
@@ -247,7 +252,12 @@ const Musics = () => {
         handleClose={handleCloseModal}
         handleSave={handleSaveMusic}
       />
-      <MusicSse cbUpdate={syncUpdate} cbAdd={syncAdd} cbDelete={syncDelete} />
+      <MusicSyncer
+        syncAdd={syncAdd}
+        syncEdit={syncEdit}
+        syncDelete={syncDelete}
+      />
+      <AppLocalization />
     </div>
   );
 };

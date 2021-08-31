@@ -3,6 +3,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
 import MusicNoteIcon from "@material-ui/icons/MusicNote";
 import FavoriteIcon from "@material-ui/icons/Favorite";
+import Localization from "../../../common/modules/Localization";
+import { useSelector } from "react-redux";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -15,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
 const MusicCalatogs = ({ setShowFavorite }) => {
   const classes = useStyles();
   const [tab, setTab] = React.useState(0);
+  const lang = useSelector(state => state.music.lang);
 
   const handleChange = (event, newTab) => {
     setShowFavorite(newTab === 1);
@@ -30,8 +33,8 @@ const MusicCalatogs = ({ setShowFavorite }) => {
         onChange={handleChange}
         aria-label="disabled tabs example"
       >
-        <Tab label="All" icon={<MusicNoteIcon />} />
-        <Tab label="Favorite" icon={<FavoriteIcon />} />
+        <Tab label={Localization.catalog.all} icon={<MusicNoteIcon />} />
+        <Tab label={Localization.catalog.favorite} icon={<FavoriteIcon />} />
       </Tabs>
     </AppBar>
   );

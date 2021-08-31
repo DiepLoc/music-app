@@ -5,6 +5,8 @@ import getStaticUrl from "../../../common/utils/getStaticUrl";
 import SkipNextIcon from "@material-ui/icons/SkipNext";
 import SkipPreviousIcon from "@material-ui/icons/SkipPrevious";
 import PlayingStyle from "./PlayingStyle";
+import { useSelector } from "react-redux";
+import Localization from "../../../common/modules/Localization";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -21,6 +23,8 @@ const useStyles = makeStyles((theme) => ({
   musicInfo: {
     marginLeft: theme.spacing(1),
     fontStyle: "italic",
+    width: 200,
+    textAlign: 'right'
   },
   audio: {
     width: "100%",
@@ -34,6 +38,7 @@ const useStyles = makeStyles((theme) => ({
 
 const MusicPlayer = ({ relativeUrl, musicName, singer, goNext, goPrevious }) => {
   const classes = useStyles();
+  const lang = useSelector(state => state.music.lang);
   const [loop, setLoop] = useState(true);
   const audioRef = useRef(null);
 
@@ -49,7 +54,7 @@ const MusicPlayer = ({ relativeUrl, musicName, singer, goNext, goPrevious }) => 
           {musicName}
         </Typography>
         <Typography variant="body2" color="secondary">
-          Singer: {singer}
+          {Localization.field.singer}: {singer || "unknown"}
         </Typography>
       </div>
       <audio controls className={classes.audio} autoPlay loop={loop} ref={r => audioRef.current = r}>

@@ -18,10 +18,15 @@ import FavoriteOutlinedIcon from "@material-ui/icons/FavoriteOutlined";
 import MenuOutlinedIcon from "@material-ui/icons/MenuOutlined";
 import { makeStyles } from "@material-ui/core/styles";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import Localization from "../../../common/modules/Localization";
 
 const useStyles = makeStyles((theme) => ({
   inline: {
     display: "inline",
+  },
+  highlight: {
+    background: '#CCC',
   },
   deleteConfirm: {
     padding: theme.spacing(2),
@@ -35,8 +40,10 @@ const MusicItem = ({
   handleDeleteMusic,
   loading,
   onEditMusic,
+  highlight = false,
 }) => {
   const classes = useStyles();
+  const lang = useSelector(state => state.music.lang);
   const [anchorMenuEl, setAnchorMenuEl] = useState(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
@@ -60,7 +67,7 @@ const MusicItem = ({
 
   return (
     <React.Fragment>
-      <ListItem alignItems="flex-start">
+      <ListItem alignItems="flex-start" className={highlight ? classes.highlight : ''}>
         <ListItemAvatar>
           <Avatar alt={music.name} src="">
             {music.name[0].toUpperCase()}
@@ -76,9 +83,9 @@ const MusicItem = ({
                 className={classes.inline}
                 color="textPrimary"
               >
-                Singer: {music.singer || "unknown"}
+                {Localization.field.singer}: {music.singer || "unknown"}
               </Typography>
-              {` — Creator: ${music.creator || "unknown"}`}
+              {` — ${Localization.field.creator}: ${music.creator || "unknown"}`}
             </React.Fragment>
           }
         />
@@ -90,8 +97,8 @@ const MusicItem = ({
             open={Boolean(anchorMenuEl)}
             onClose={handleCloseMenu}
           >
-            <MenuItem onClick={() => onEdit(music._id)}>Edit</MenuItem>
-            <MenuItem onClick={onDeleteMusic}>Delete</MenuItem>
+            <MenuItem onClick={() => onEdit(music._id)}>{Localization.menu.edit}</MenuItem>
+            <MenuItem onClick={onDeleteMusic}>{Localization.menu.delete}</MenuItem>
           </Menu>
           <Dialog
             open={openDeleteDialog}
@@ -101,7 +108,7 @@ const MusicItem = ({
           >
             <div className={classes.deleteConfirm}>
               <Typography>
-                Confirm deletion. Note: this is not recoverable
+              {Localization.menu.deleteWarn}
               </Typography>
               <Button
                 size="small"
@@ -111,7 +118,7 @@ const MusicItem = ({
                 onClick={() => handleDeleteMusic(music._id)}
                 disabled={loading}
               >
-                Confirm delete
+                {Localization.menu.deleteConfirm}
               </Button>
             </div>
           </Dialog>
